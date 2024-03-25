@@ -8,95 +8,102 @@ export default class Car {
     this.status = 'stopped';
     this.velocity = null;
     this.distance = null;
+    this.time = null;
   }
 
   async startRace() {
     return new Promise(async (res, rej) => {
-      try {
-        // await this.stopEngine();
-        await this.startEngine()
-        await this.drive();
-        await this.stopEngine();
+      const isStarted = await this.startEngine()
+      const isDrive = await this.drive();
+      this.stopEngine();
+
+      if (isStarted && isDrive) {
         res(this)
-      } catch (err) {
-        await this.stopEngine();
-        rej(33333)
+      } else {
+        res(null)
       }
     })
   }
 
   async startEngine() {
-    if (this.status !== 'stopped') {
-      //err
-    }
+    return new Promise(async (res, rej) => {
+      // if (this.status !== 'stopped') {
+      //   res(false)
+      // }
 
+      const response = await fetch(`${API_URL}/engine?id=${this.id}&status=started`, {
+        method: 'PATCH',
+      })
 
-    const res = await fetch(`${API_URL}/engine?id=${this.id}&status=started`, {
-      method: 'PATCH',
+      if (response.status !== 200) {
+        // err
+        res(false)
+      }
+
+      this.status = 'started'
+      const data = await response.json()
+
+      const { velocity, distance } = data;
+
+      this.distance = distance;
+      this.velocity = velocity;
+
+      res(true)
     })
 
-    if (res.status !== 200) {
-      // err
-    }
-
-    this.status = 'started'
-    const data = await res.json()
-
-
-    const { velocity, distance } = data;
-
-    this.distance = distance;
-    this.velocity = velocity;
-
-    return this;
   }
 
   async drive() {
-    if (this.status !== 'started') {
-      //err
-    }
+    return new Promise(async (res, rej) => {
+      if (this.status !== 'started') {
+        res(false)
+      }
+
+      // this.status = 'drive';
+
+      const response = await fetch(`${API_URL}/engine?id=${this.id}&status=drive`, {
+        method: 'PATCH',
+      })
 
 
-    this.status = 'drive';
+      if (response.status !== 200) {
+        // err
+        res(false)
+      }
 
-    const res = await fetch(`${API_URL}/engine?id=${this.id}&status=drive`, {
-      method: 'PATCH',
+      this.status = 'drive';
+      this.time = Math.round(this.distance / this.velocity);
+      // this.status = 'stopped'
+
+      res(true)
     })
 
-    if (res.status !== 200) {
-      // err
-      this.time = null;
-    } else {
-      this.time = Math.round(this.distance / this.velocity);
-    }
-
-    // this.status = 'stopped'
-
-    return this;
   }
 
   async stopEngine() {
-    if (this.status === 'stopped') {
-      //err
-    }
+    return new Promise(async (res, rej) => {
+      if (this.status === 'stopped') {
+        res(false)
+      }
 
+      const response = await fetch(`${API_URL}/engine?id=${this.id}&status=stopped`, {
+        method: 'PATCH',
+      })
 
+      if (response.status !== 200) {
+        // err
+        res(false)
+      }
 
-    const res = await fetch(`${API_URL}/engine?id=${this.id}&status=stopped`, {
-      method: 'PATCH',
+      this.status = 'stopped'
+      return this;
     })
+  }
 
-    if (res.status !== 200) {
-      // err
-    }
-
-    this.status = 'stopped'
-
-    // method
+  resetStats() {
     this.distance = null;
     this.velocity = null;
-
-    return this;
+    this.time = null;
   }
 
 }

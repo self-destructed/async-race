@@ -3,6 +3,10 @@ import Car from "./car.js";
 import Garage from "./garage.js";
 
 
+// const car = new Car({ id: 1, name: "Tesla", color: "#e6e6fa" })
+// car.startEngine().then(console.log)
+// car.startRace().then(console.log);
+
 const app = new App()
 app.init();
 // console.log(app)

@@ -7,7 +7,9 @@ export default class Garage {
   }
 
   async race() {
+    // this.cars.map(car => car.stopEngine());
     const res = this.cars.map(car => car.startRace());
+    // const res = await Promise.allSettled(this.cars.map(car => car.startRace()));
     console.log(res)
   }
 }
